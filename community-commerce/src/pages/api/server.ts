@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import dbConnection from '../../lib/DbConnection/DbConnection';  // Adjust the path to your `db` connection
-import UserCredentials from '@/models/loginModel/userCredentials';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {

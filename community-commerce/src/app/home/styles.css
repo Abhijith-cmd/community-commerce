@@ -1,0 +1,38 @@
+
+/* a:hover{
+    text-decoration: underline;
+    color: currentColor;
+    cursor: pointer;
+   
+}
+
+div{
+    color:black,
+} */
+
+/* .logo-style:hover{
+    transform: scale(1.1);
+} */
+
+/* .description {
+    width: auto; 
+    max-width: 90%; 
+    padding: 4px; 
+    text-align: center; 
+    background-color: rgba(255, 255, 255, 0.8); 
+    border-radius: 5px; 
+  }
+  
+  
+  .group:hover .description {
+    opacity: 1; 
+  }
+  
+
+  @media (max-width: 768px) {
+    .description {
+      font-size: 0.9rem; 
+      padding: 2px; 
+    }
+  }
+   */
