@@ -3,11 +3,12 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 
-import LocalHighlights from '@/components/localhighlights';
-import RegionalHighlights from '@/components/RegionalHighlights/regional_highlights';
-import LoginPage from "./loginPage/page";
+const LocalHighlights = dynamic(() => import('@/components/localhighlights'), { ssr: false });
+const RegionalHighlights = dynamic(() => import('@/components/RegionalHighlights/regional_highlights'), { ssr: false });
+const LoginPage = dynamic(() => import("./loginPage/page"), { ssr: false });
 
 interface Banner {
   _id: string;
