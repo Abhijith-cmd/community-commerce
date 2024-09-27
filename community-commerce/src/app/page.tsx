@@ -3,10 +3,12 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import dynamic from "next/dynamic";
 import Image from "next/image";
-import LocalHighlights from "@/components/localhighlights";
-import RegionalHighlights from "@/components/RegionalHighlights/regional_highlights";
-import LoginPage from "./loginPage/page";
+
+const LocalHighlights = dynamic(() => import('@/components/localhighlights'), { ssr: false });
+const RegionalHighlights = dynamic(() => import('@/components/RegionalHighlights/regional_highlights'), { ssr: false });
+const LoginPage = dynamic(() => import("./loginPage/page"), { ssr: false });
 
 interface Banner {
   _id: string;
@@ -22,12 +24,6 @@ interface FooterData {
   section_4: string[];
 }
 
-const cache = {
-  menuData: null as any,
-  bannersData: null as any,
-  footerData: null as any,
-};
-
 export default function Home() {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -36,25 +32,23 @@ export default function Home() {
   const router = useRouter();
   const bannersToShow = 4; // Number of banners to show at a time
 
-  // Fetch data in parallel and cache it
+  // Fetch data in parallel using Promise.all to reduce load time
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (!cache.menuData || !cache.bannersData || !cache.footerData) {
-          const [menuResponse, bannersResponse, footerResponse] = await Promise.all([
-            fetch("/api/MenuListRoutes"),
-            fetch("/api/promotionalBannerRoutes"),
-            fetch("/api/footerRoutes"),
-          ]);
+        const [menuResponse, bannersResponse, footerResponse] = await Promise.all([
+          fetch("/api/MenuListRoutes"),
+          fetch("/api/promotionalBannerRoutes"),
+          fetch("/api/footerRoutes")
+        ]);
 
-          cache.menuData = await menuResponse.json();
-          cache.bannersData = await bannersResponse.json();
-          cache.footerData = await footerResponse.json();
-        }
+        const menuData = await menuResponse.json();
+        const bannersData = await bannersResponse.json();
+        const footerData = await footerResponse.json();
 
-        setMenuItems(cache.menuData.map((item: { name: string }) => item.name));
-        setBanners(cache.bannersData);
-        setFooterData(cache.footerData);
+        setMenuItems(menuData.map((item: { name: string }) => item.name));
+        setBanners(bannersData);
+        setFooterData(footerData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -63,7 +57,6 @@ export default function Home() {
     fetchData();
   }, []);
 
-  // Memoized callback functions to prevent re-renders
   const nextBanners = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex + bannersToShow) % banners.length);
   }, [banners.length, bannersToShow]);
@@ -88,25 +81,35 @@ export default function Home() {
         {/* Navigation Links */}
         <div className="w-full sm:w-3/5 md:w-4/5 bg-white flex flex-wrap">
           <div className="flex justify-between px-3 py-2 w-full">
-            <div className="flex items-center"></div>
+            <div className="flex items-center">
+              {/* Header navigation */}
+            </div>
+
             <div className="flex flex-wrap justify-end gap-4 font-bold items-center">
+              {/* <a href="" className="block">Contact Us</a> */}
               <div className="block hover:underline cursor-pointer" onClick={() => handleNavigation('/contactUs')}>Contact Us</div>
-              <span className="flex flex-row">
-                <span className="block hover:underline cursor-pointer" onClick={() => handleNavigation('/signUpPage')}>Sign Up</span>
-              </span>
+              {/* <a href="" className="block">Login/Sign Up/Logout</a> */}
+              <span className='flex flex-row'>
+                {/* <span className='block hover:underline cursor-pointer' onClick={()=>handleNavigation('/loginPage')}>Login</span>/ */}
+                <span className='block hover:underline cursor-pointer' onClick={() => handleNavigation('/signUpPage')}>Sign Up</span></span>
               <select className="block outline-none px-2 py-1 text-center rounded-md">
                 <option value="Language">Select Language</option>
                 <option value="English">English</option>
                 <option value="French">French</option>
               </select>
-              <a href="#" className="block">Cart <FontAwesomeIcon icon={faShoppingCart} size="lg" /></a>
+              {/* <a href="#" className="block" onClick={() => handleNavigation('/Profile')}>Profile</a> */}
+              {/* <div className='block hover:underline cursor-pointer' onClick={() => handleNavigation('/profile')}>Profile</div>
+               */}
+              <div className="relative bg-white">
+              </div>
+              <a href="" className="block">Cart <FontAwesomeIcon icon={faShoppingCart} size="lg" /></a>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Menu Section */}
-      <section className="flex flex-wrap justify-center w-full px-4 py-3 font-bold">
+      <section className="flex flex-wrap justify-center w-full px-4 py-3 font-bold bg-black text-white">
         <div className="flex flex-wrap gap-6 sm:gap-12">
           {menuItems.map((menuItem, index) => (
             <div key={index}>
@@ -146,7 +149,7 @@ export default function Home() {
                     height={300}
                     className="w-full h-auto rounded"
                     style={{ objectFit: "cover" }}
-                    priority // Use priority for critical images
+                    priority
                   />
                   <div className="absolute bottom-4 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <h3 className="font-semibold px-6 py-2 bg-white rounded-md">{banner.description}</h3>
