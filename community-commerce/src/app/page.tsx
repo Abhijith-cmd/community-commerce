@@ -5,8 +5,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import Local_Highlights from "@/components/local_highlights";
 
-const LocalHighlights = dynamic(() => import('@/components/localhighlights'), { ssr: false });
+//const LocalHighlights = dynamic(() => import('@/components/localhighlights'), { ssr: false });
 const RegionalHighlights = dynamic(() => import('@/components/RegionalHighlights/regional_highlights'), { ssr: false });
 const LoginPage = dynamic(() => import("./loginPage/page"), { ssr: false });
 
@@ -123,7 +124,8 @@ export default function Home() {
       <section className="flex flex-col sm:flex-row w-full h-full py-4 bg-white">
         <div className="w-full max-h-full flex justify-center items-center">
           <div className="px-4 py-4">
-            <LocalHighlights />
+            {/* <LocalHighlights /> */}
+            <Local_Highlights/>
           </div>
         </div>
         <aside className="w-full sm:w-3/6 py-4">

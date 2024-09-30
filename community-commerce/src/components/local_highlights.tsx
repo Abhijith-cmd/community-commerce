@@ -10,52 +10,22 @@ interface Highlight {
 interface CountryHighlights {
   _id: string;
   abbreviation: string;
-  country_name: string; // Updated from region to country_name
+  country_name: string; 
   highlights: Highlight[];
 }
  
-interface LocalHighlightsProps {
-    country?: string; // Optional country prop
-    countryName?: string;
-  }
- 
-const LocalHighlights: React.FC<LocalHighlightsProps> = ({ country,countryName }) => {
+const Local_Highlights = () => {
   const [countryHighlights, setCountryHighlights] = useState<CountryHighlights | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
  
-//   const fetchHighlights = async (abbreviation: string) => {
-//     try {
-//       const res = await fetch(`/api/highlights?abbreviation=${abbreviation}`); // Update the endpoint to use country abbreviation
-//       if (!res.ok) {
-//         throw new Error("Failed to fetch highlights");
-//       }
-//       const data: CountryHighlights[] = await res.json(); // Expecting an array
-//       setCountryHighlights(data[0]); // Set the first country's highlights
-//     } catch (error) {
-//       console.error("Error fetching highlights:", error);
-//       setError("Failed to fetch local highlights");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
- 
-const fetchHighlights = async (countryAbbreviation: string) => {
+  const fetchHighlights = async (abbreviation: string) => {
     try {
-      // Here we check if the country prop is available
-      console.log("country data in local highlights",country)
-     
-      //const countryAbbreviation = country; // Use country if available, otherwise use abbreviation
-     
-      const res = await fetch(`/api/highlights?abbreviation=${countryAbbreviation}`); // Use the countryAbbreviation here
-      console.log("the data in fetchHighlights",countryAbbreviation);
-     
+      const res = await fetch(`/api/highlights?abbreviation=${abbreviation}`); // Update the endpoint to use country abbreviation
       if (!res.ok) {
         throw new Error("Failed to fetch highlights");
       }
       const data: CountryHighlights[] = await res.json(); // Expecting an array
-      console.log(data[0],"the data from the fetchHighlights");
-     
       setCountryHighlights(data[0]); // Set the first country's highlights
     } catch (error) {
       console.error("Error fetching highlights:", error);
@@ -65,14 +35,23 @@ const fetchHighlights = async (countryAbbreviation: string) => {
     }
   };
  
- // Effect to fetch highlights whenever the country changes
- useEffect(() => {
-    if (country) {
-      fetchHighlights(country);
-    }
-  }, [country]);
+  useEffect(() => {
+    const getLocationAndFetchHighlights = async () => {
+      try {
+        const res = await fetch("https://ipinfo.io?token=e22317b476e9fb");
+        const locationData = await res.json();
+        const country = locationData.country || "Unknown"; // Get the country abbreviation
  
-  
+        fetchHighlights(country); // Fetch highlights for the country
+      } catch (error) {
+        console.error("Error fetching location:", error);
+        setError("Could not determine your location.");
+        setLoading(false);
+      }
+    };
+ 
+    getLocationAndFetchHighlights();
+  }, []);
  
   return (
     <div className="local-highlights px-6 py-4 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg shadow-lg border border-gray-200">
@@ -83,7 +62,7 @@ const fetchHighlights = async (countryAbbreviation: string) => {
       {countryHighlights && (
         <>
           <h3 className="text-lg font-semibold mb-2 text-purple-700">
-            Highlights for {countryName ?countryName :countryHighlights.country_name }
+            Highlights for {countryHighlights.country_name}
           </h3>
  
           {countryHighlights.highlights.length === 0 && !loading && !error ? (
@@ -115,5 +94,5 @@ const fetchHighlights = async (countryAbbreviation: string) => {
   );
 };
  
-export default LocalHighlights;
+export default Local_Highlights;
  
