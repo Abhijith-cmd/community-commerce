@@ -5,9 +5,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import Local_Highlights from "@/components/local_highlights";
+//import Local_Highlights from "@/components/local_highlights";
+import { usePathname } from 'next/navigation';
 
-//const LocalHighlights = dynamic(() => import('@/components/localhighlights'), { ssr: false });
+const Local_Highlights = dynamic(() => import('@/components/local_highlights'), { ssr: false });
 const RegionalHighlights = dynamic(() => import('@/components/RegionalHighlights/regional_highlights'), { ssr: false });
 const LoginPage = dynamic(() => import("./loginPage/page"), { ssr: false });
 
@@ -25,29 +26,49 @@ interface FooterData {
   section_4: string[];
 }
 
+// Define the type for menu items
+interface MenuItem {
+  label: string;
+  link: string;
+}
+
+
+
 export default function Home() {
-  const [menuItems, setMenuItems] = useState<string[]>([]);
+  //const [menuItems, setMenuItems] = useState<string[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [footerData, setFooterData] = useState<FooterData | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const router = useRouter();
   const bannersToShow = 4; // Number of banners to show at a time
+  const menuItems:MenuItem[] = [
+    { label: 'Home', link: '/' },
+    { label: 'Support', link: '/support' },
+    { label: 'Community', link: '/community' },
+    { label: 'Events', link: '/events' },
+    { label: 'Blog', link: '/blog' },
+    { label: 'About us', link: '/about_us' },
+    { label: 'Shop', link: '/shop' }
+  ];
+  const currentRoute = usePathname();
 
   // Fetch data in parallel using Promise.all to reduce load time
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [menuResponse, bannersResponse, footerResponse] = await Promise.all([
-          fetch("/api/MenuListRoutes"),
+//const [menuResponse, bannersResponse, footerResponse] = await Promise.all([
+const [ bannersResponse, footerResponse] = await Promise.all([
+
+          //fetch("/api/MenuListRoutes"),
           fetch("/api/promotionalBannerRoutes"),
           fetch("/api/footerRoutes")
         ]);
 
-        const menuData = await menuResponse.json();
+        //const menuData = await menuResponse.json();
         const bannersData = await bannersResponse.json();
         const footerData = await footerResponse.json();
 
-        setMenuItems(menuData.map((item: { name: string }) => item.name));
+        //menuItems(menuData.map((mitem: { name: string }) => item.name));
         setBanners(bannersData);
         setFooterData(footerData);
       } catch (error) {
@@ -109,16 +130,26 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main Menu Section */}
       <section className="flex flex-wrap justify-center w-full px-4 py-3 font-bold bg-black text-white">
-        <div className="flex flex-wrap gap-6 sm:gap-12">
-          {menuItems.map((menuItem, index) => (
-            <div key={index}>
-              <a href="#">{menuItem}</a>
-            </div>
-          ))}
-        </div>
-      </section>
+  <div className="flex flex-wrap gap-6 sm:gap-12">
+    {menuItems.map((menuItem, index) => (
+      <div key={index}>
+        <a
+          href={menuItem.link}
+          className={`hover:text-blue-400 transition duration-300 px-3 py-1 rounded-md ${
+            currentRoute === menuItem.link
+              ? 'bg-blue-500 text-white font-bold shadow-lg border-b-2 border-blue-700'
+              : ''
+          }`}
+        >
+          {menuItem.label}
+        </a>
+      </div>
+    ))}
+  </div>
+</section>
+
+    
 
       {/* Local Highlights and Login Section */}
       <section className="flex flex-col sm:flex-row w-full h-full py-4 bg-white">
