@@ -270,7 +270,8 @@ const fetchHighlights = async (abbreviation: string) => {
         const res = await fetch("https://ipinfo.io?token=e22317b476e9fb");
         const locationData = await res.json();
         const country = locationData.country || "Unknown";
- 
+        console.log(locationData);
+
         fetchHighlights(country); // Fetch highlights for the country
       } catch (error) {
         console.error("Error fetching location:", error);
