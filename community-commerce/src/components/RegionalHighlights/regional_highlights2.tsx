@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 const Regional_Highlights2 = () => {
-  const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
+  //const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [userDistrict, setUserDistrict] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
@@ -10,7 +10,7 @@ const Regional_Highlights2 = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          setLocation({ lat: latitude, lon: longitude });
+          //setLocation({ lat: latitude, lon: longitude });
           fetchUserDistrict(latitude, longitude); // Fetch district after getting coordinates
         },
         (error) => {
