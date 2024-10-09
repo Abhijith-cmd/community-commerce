@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 //import Local_Highlights from "@/components/local_highlights";
 import { usePathname } from 'next/navigation';
+import  styles from './Slideshow.module.css';
 
 const Local_Highlights = dynamic(() => import('@/components/local_highlights'), { ssr: false });
 const RegionalHighlights = dynamic(() => import('@/components/RegionalHighlights/regional_highlights'), { ssr: false });
@@ -51,6 +52,7 @@ export default function Home() {
     { label: 'Shop', link: '/shop' }
   ];
   const currentRoute = usePathname();
+  
 
   // Fetch data in parallel using Promise.all to reduce load time
   useEffect(() => {
@@ -90,6 +92,22 @@ const [ bannersResponse, footerResponse] = await Promise.all([
   const handleNavigation = useCallback((path: string) => {
     router.push(path);
   }, [router]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const totalSlides = 3; // Set total slides to 2
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prevSlide) => {
+        if (prevSlide < totalSlides - 1) {
+          return prevSlide + 1; // Go to the next slide
+        } else {
+          return 0; // Loop back to the first slide
+        }
+      });
+    }, 5000); // Change slide every 5 seconds
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [totalSlides]);
 
   return (
     <div className="flex flex-col flex-shrink overflow-x-hidden text-black">
@@ -149,7 +167,66 @@ const [ bannersResponse, footerResponse] = await Promise.all([
   </div>
 </section>
 
-    
+<div className={styles.banner}>
+  <div className={styles.slides}>
+    <div
+      className={`${styles.slide} ${styles.slide1}`}
+      style={{ display: currentSlide === 0 ? 'block' : 'none' }}
+    >
+      <div className={styles.content}>
+        <div className={styles.topText}>Shopping Festival</div>
+        <div className={styles.mainText}>Connect and Collect</div>
+      </div>
+      <div className={styles.offer}>
+        <div className={styles.discount}>up to</div>
+        <div className={styles.discountValue}>50% OFF</div>
+      </div>
+      <button className={styles.shopButton}>Shop now</button>
+    </div>
+
+    <div
+      className={`${styles.slide} ${styles.slide2}`}
+      style={{ display: currentSlide === 1 ? 'block' : 'none' }}
+    >
+      <div className={styles.content}>
+        <div className={styles.topText}>Limited Time Deal</div>
+        <div className={styles.mainText}>Buy 1 Get 1 Free</div>
+      </div>
+      <div className={styles.offer}>
+        <div className={styles.discount}>Hurry!</div>
+        <div className={styles.discountValue}>Only Today</div>
+      </div>
+      <button className={styles.shopButton}>Grab the Deal</button>
+    </div>
+
+    <div
+      className={`${styles.slide} ${styles.slide3}`}
+      style={{ display: currentSlide === 2 ? 'block' : 'none' }}
+    >
+      <div className={styles.content}>
+        <div className={styles.topText}>Exclusive Collection</div>
+        <div className={styles.mainText}>New Arrivals</div>
+      </div>
+      <div className={styles.offer}>
+        <div className={styles.discount}>Offer</div>
+        <div className={styles.discountValue}>30% OFF</div>
+      </div>
+      <button className={styles.shopButton}>Explore Collection</button>
+    </div>
+  </div>
+
+  {/* Dots for slide navigation */}
+  <div className={styles.dotsContainer}>
+    {Array.from({ length: 3 }, (_, index) => (
+      <span
+        key={index}
+        className={`${styles.dot} ${currentSlide === index ? styles.activeDot : ''}`}
+        onClick={() => setCurrentSlide(index)} // Assuming you have a function to set the current slide
+      ></span>
+    ))}
+  </div>
+</div>
+
 
       {/* Local Highlights and Login Section */}
       <section className="flex flex-col sm:flex-row w-full h-full py-4 bg-white">
@@ -163,6 +240,7 @@ const [ bannersResponse, footerResponse] = await Promise.all([
           <LoginPage />
         </aside>
       </section>
+
 
       {/* Promotional Banners Section */}
       <section className="flex justify-center bg-white py-4">

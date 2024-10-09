@@ -1,0 +1,71 @@
+.banner {
+    position: relative;
+    background-color: #6200ea; /* Purple background */
+    height: 580px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .topText {
+    font-size: 2rem;
+    color: #ffc107; /* Yellow color for "ENDS TONIGHT" */
+    font-weight: bold;
+  }
+  
+  .mainText {
+    font-size: 8rem; /* Large text for "WAY DAY" */
+    font-weight: bold;
+  }
+  
+  .subText {
+    font-size: 1.5rem;
+    margin-top: 10px;
+  }
+  
+  .offer {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: #ffc107; /* Yellow badge */
+    padding: 10px 20px;
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  .discount {
+    font-size: 1.5rem;
+  }
+  
+  .discountValue {
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+  
+  .shopButton {
+    position: absolute;
+    bottom: 30px;
+    background-color: #ff9800; /* Bright yellow button */
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .shopButton:hover {
+    background-color: #ff5722;
+  }
+  

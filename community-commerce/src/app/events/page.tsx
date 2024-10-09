@@ -10,8 +10,7 @@ import dynamic from "next/dynamic";
 import { usePathname } from 'next/navigation';
 
 
-const Local_Highlights = dynamic(() => import('@/components/local_highlights'), { ssr: false });
-const Regional_Highlights2 = dynamic(() => import('@/components/RegionalHighlights/regional_highlights2'), { ssr: false });
+const District_Events = dynamic(() => import('@/components/district_events/district_events'), { ssr: false });
 
 
 
@@ -128,19 +127,14 @@ const [footerResponse] = await Promise.all([
   </div>
 </section>
 
+
     
-          {/* Local Highlights */}
-            <div className="w-full max-h-full">
-              <div className="px-4 py-4">
-                {/* <LocalHighlights /> */}
-                <Local_Highlights/>
-              </div>
-            </div>
+          
 
             {/* Regional Highlights Section */}
             <div className="w-full max-h-full flex">
               <div className="px-4 py-4">
-          <Regional_Highlights2/>
+          <District_Events/>
             </div>
          </div>
       {/* Footer */}
