@@ -24,7 +24,7 @@ import DistrictEventModel from '../../../models/districtEventModel/districtEvent
 //   return res.status(405).end(`Method ${req.method} Not Allowed`);
 // }
  
-
+ 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await dbConnection(); // Ensure the database is connected
  

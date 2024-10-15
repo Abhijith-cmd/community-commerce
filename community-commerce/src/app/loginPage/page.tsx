@@ -1,72 +1,3 @@
-// "use client";
-// import { useState } from "react"
-// import axios from "axios"
-// import { toast } from "react-toastify";
-// import { useRouter } from "next/navigation";
-
-
-// export default function LoginPage() {
-//     const [username, setUsername] = useState("");
-//     const [password, setPassword] = useState("");
-//     const router = useRouter();
-
-//     const handleLogin = async (e: React.FormEvent) => {
-//         e.preventDefault();
-//         try {
-//             const response = await axios.post("/api/loginValidationRoutes", {
-//                 username,
-//                 password
-//             });
-
-//             // Show success toast
-//             toast.success(response.data.message);
-//             router.push("/home");
-//         } catch (err: any) {
-//             // Show error toast
-//             toast.error(err.response?.data.error || 'An unexpected error occurred');
-//         }
-//     };
-
-//     return (
-//         <div className="min-w-screen min-h-screen flex flex-row justify-center items-center">
-//             <form action="" onSubmit={handleLogin} className="w-2/5 flex flex-row justify-center items-center">
-
-//                 <div className="bg-green-300 text-black w-full flex-col login-form justify-center items-center px-20 py-20 rounded-lg">
-//                     <div className="px-4 py-4"><h1 className="font-bold text-center text-2xl">Community Commerce</h1></div>
-//                     <div className=" flex flex-col m-auto px-4 py-4 min-w-1/2">
-//                         <label htmlFor="username" className="font-bold w-full ">Username</label>
-//                         <input type="text"
-//                             id="username"
-//                             value={username}
-//                             onChange={(e) => setUsername(e.target.value)}
-//                             className="rounded-lg outline-none px-2 py-1 border-none w-full" required />
-//                     </div>
-//                     <div className=" flex flex-col m-auto px-4 py-4">
-//                         <label htmlFor="password" className="font-bold">Password</label>
-//                         <input
-//                             id="password"
-//                             value={password}
-//                             onChange={(e) => setPassword(e.target.value)}
-//                             className="rounded-lg outline-none px-2 py-1 border-none" type="password" required />
-//                     </div>
-//                     <div className=" flex flex-col m-auto px-4 py-4 ">
-//                         <button type="submit" className="bg-black
-//                          text-white
-//                           rounded-lg 
-//                           px-4
-//                            py-2 
-//                           font-bold
-//                          hover:bg-gray-600
-//                          hover:border-solid hover:border-blue-600
-//                           hover:text-white ">Log in</button>
-//                     </div>
-//                 </div>
-//             </form>
-//         </div>
-//     )
-// }
-
-
 "use client";
 import { useState } from "react";
 import axios, { AxiosError } from "axios";
@@ -121,6 +52,23 @@ export default function LoginPage() {
             }
         }
     };
+
+    // const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    //     e.preventDefault();
+
+    //     const result = await signIn("credentials", {
+    //         redirect: false,
+    //         username,
+    //         password,
+    //     });
+
+    //     if (result?.error) {
+    //         toast.error(result.error);
+    //     } else {
+    //         // Successful login
+    //         router.push("/home");
+    //     }
+    // };
 
     const handleNavigation = (path: string) => {
         router.push(path);

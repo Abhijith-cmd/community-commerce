@@ -124,7 +124,7 @@ const fetchUserDistrictAndHighlights = useCallback(async () => {
  
       {error && <p className="text-red-600 mb-4">{error}</p>}
  
-
+ 
  
       {/* Display the regional highlights */}
       {districtEvents && (

@@ -27,4 +27,3 @@ const DistrictEventSchema = new Schema<DistrictEvent>({
 const DistrictEventModel = mongoose.models.DistrictEvent || mongoose.model<DistrictEvent>('DistrictEvent', DistrictEventSchema);
  
 export default DistrictEventModel;
- 

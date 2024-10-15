@@ -1,100 +1,47 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShoppingCart, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import dynamic from "next/dynamic";
-import Image from "next/image";
-//import Local_Highlights from "@/components/local_highlights";
-import { usePathname } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import LoginPage from "./loginPage/page";
+import { useRouter } from 'next/navigation';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import RegionalHighlights from '@/components/RegionalHighlights/regional_highlights';
+import Image from 'next/image';
+import LocalHighlights2 from '@/components/localHighlightsForHome/Page';
 import  styles from './Slideshow.module.css';
-
-const Local_Highlights = dynamic(() => import('@/components/local_highlights'), { ssr: false });
-const RegionalHighlights = dynamic(() => import('@/components/RegionalHighlights/regional_highlights'), { ssr: false });
-const LoginPage = dynamic(() => import("./loginPage/page"), { ssr: false });
-
-interface Banner {
-  _id: string;
-  imageUrl: string;
-  description: string;
-  link: string;
-}
-
-interface FooterData {
-  section_1: string[];
-  section_2: string[];
-  section_3: string[];
-  section_4: string[];
-}
-
-// Define the type for menu items
-interface MenuItem {
-  label: string;
-  link: string;
-}
-
 
 
 export default function Home() {
-  //const [menuItems, setMenuItems] = useState<string[]>([]);
+  const [menuItems, setMenuItems] = useState<string[]>([]);
+  const router = useRouter();
+
+  interface Banner {
+    _id: string;
+    imageUrl: string;
+    description: string;
+    link: string;
+  }
+
+  interface FooterData {
+    section_1: string[];
+    section_2: string[];
+    section_3: string[];
+    section_4: string[];
+  }
+
   const [banners, setBanners] = useState<Banner[]>([]);
   const [footerData, setFooterData] = useState<FooterData | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const router = useRouter();
   const bannersToShow = 4; // Number of banners to show at a time
-  const menuItems:MenuItem[] = [
-    { label: 'Home', link: '/' },
-    { label: 'Support', link: '/support' },
-    { label: 'Community', link: '/community' },
-    { label: 'Events', link: '/events' },
-    { label: 'Blog', link: '/blog' },
-    { label: 'About us', link: '/about_us' },
-    { label: 'Shop', link: '/shop' }
-  ];
-  const currentRoute = usePathname();
-  
+  // const [showProfileOptions, setShowProfileOptions] = useState(false);
 
-  // Fetch data in parallel using Promise.all to reduce load time
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-//const [menuResponse, bannersResponse, footerResponse] = await Promise.all([
-const [ bannersResponse, footerResponse] = await Promise.all([
+  // const toggleProfileOptions = () => {
+  //   setShowProfileOptions(!showProfileOptions);
+  // };
 
-          //fetch("/api/MenuListRoutes"),
-          fetch("/api/promotionalBannerRoutes"),
-          fetch("/api/footerRoutes")
-        ]);
-
-        //const menuData = await menuResponse.json();
-        const bannersData = await bannersResponse.json();
-        const footerData = await footerResponse.json();
-
-        //menuItems(menuData.map((mitem: { name: string }) => item.name));
-        setBanners(bannersData);
-        setFooterData(footerData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const nextBanners = useCallback(() => {
-    setCurrentIndex((prevIndex) => (prevIndex + bannersToShow) % banners.length);
-  }, [banners.length, bannersToShow]);
-
-  const prevBanners = useCallback(() => {
-    setCurrentIndex((prevIndex) => (prevIndex - bannersToShow + banners.length) % banners.length);
-  }, [banners.length, bannersToShow]);
-
-  const handleNavigation = useCallback((path: string) => {
-    router.push(path);
-  }, [router]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const totalSlides = 3; // Set total slides to 2
-
+ 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prevSlide) => {
@@ -105,9 +52,70 @@ const [ bannersResponse, footerResponse] = await Promise.all([
         }
       });
     }, 5000); // Change slide every 5 seconds
-
+ 
     return () => clearInterval(interval); // Cleanup on unmount
   }, [totalSlides]);
+
+  // Fetch menu items from the API
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        const response = await fetch('/api/MenuListRoutes');
+        const data = await response.json();
+        const menuNames = data.map((item: { name: string }) => item.name); // Extract names from the data
+        setMenuItems(menuNames);
+      } catch (error) {
+        console.error('Error fetching menu items:', error);
+      }
+    };
+
+    fetchMenuItems();
+  }, []);
+
+  // Function to handle click and navigate to a specific page
+  const handleNavigation = (path: string) => {
+    router.push(path);
+  };
+
+  // Fetch promotional banners from the API
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const response = await fetch('/api/promotionalBannerRoutes'); // Ensure your API route matches
+        const data = await response.json();
+        setBanners(data);
+      } catch (error) {
+        console.error('Error fetching banners:', error);
+      }
+    };
+
+    fetchBanners();
+    // Set an interval to fetch every X seconds (e.g., 10 seconds)
+    // const intervalId = setInterval(fetchBanners, 3000);
+
+    // Cleanup function to clear the interval when the component unmounts
+    // return () => clearInterval(intervalId);
+  }, []);
+
+  const nextBanners = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + bannersToShow) % banners.length);
+  };
+
+  const prevBanners = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - bannersToShow + banners.length) % banners.length);
+  };
+
+  useEffect(() => {
+    const fetchFooterData = async () => {
+      const response = await fetch('/api/footerRoutes'); // Adjust the API route as needed
+      const data = await response.json();
+      setFooterData(data);
+    };
+
+    fetchFooterData();
+  }, []);
+
+
 
   return (
     <div className="flex flex-col flex-shrink overflow-x-hidden text-black">
@@ -148,24 +156,37 @@ const [ bannersResponse, footerResponse] = await Promise.all([
         </div>
       </div>
 
-      <section className="flex flex-wrap justify-center w-full px-4 py-3 font-bold bg-black text-white">
+      {/* Divider */}
+      <div className="bg-white h-[2px]"></div>
+
+      {/* Main Menu Section */}
+      {/* <div className="flex flex-wrap justify-center w-full px-4 py-3 font-bold bg-white">
+        <div className="flex flex-wrap gap-6 sm:gap-12">
+          {menuItems.map((menuItem, index) => (
+            <div key={index}>
+              <div>{menuItem}</div>
+            </div>
+          ))}
+        </div>
+      </div> */}
+
+<div className="flex flex-wrap justify-center w-full px-4 py-3 font-bold bg-white">
   <div className="flex flex-wrap gap-6 sm:gap-12">
     {menuItems.map((menuItem, index) => (
       <div key={index}>
-        <a
-          href={menuItem.link}
-          className={`hover:text-blue-400 transition duration-300 px-3 py-1 rounded-md ${
-            currentRoute === menuItem.link
-              ? 'bg-blue-500 text-white font-bold shadow-lg border-b-2 border-blue-700'
-              : ''
-          }`}
-        >
-          {menuItem.label}
-        </a>
+        {menuItem === "Shop" ? (
+          <div className='cursor-pointer' onClick={() => handleNavigation('/shop')}>{menuItem}</div>
+        ) :  menuItem === "Events" ? (
+          <div className='cursor-pointer' onClick={() => handleNavigation('/events')}>
+            {menuItem}
+          </div>
+        ) : (
+          <div className='cursor-pointer'>{menuItem}</div>
+        )}
       </div>
     ))}
   </div>
-</section>
+</div>
 
 <div className={styles.banner}>
   <div className={styles.slides}>
@@ -183,7 +204,7 @@ const [ bannersResponse, footerResponse] = await Promise.all([
       </div>
       <button className={styles.shopButton}>Shop now</button>
     </div>
-
+ 
     <div
       className={`${styles.slide} ${styles.slide2}`}
       style={{ display: currentSlide === 1 ? 'block' : 'none' }}
@@ -198,7 +219,7 @@ const [ bannersResponse, footerResponse] = await Promise.all([
       </div>
       <button className={styles.shopButton}>Grab the Deal</button>
     </div>
-
+ 
     <div
       className={`${styles.slide} ${styles.slide3}`}
       style={{ display: currentSlide === 2 ? 'block' : 'none' }}
@@ -214,7 +235,7 @@ const [ bannersResponse, footerResponse] = await Promise.all([
       <button className={styles.shopButton}>Explore Collection</button>
     </div>
   </div>
-
+ 
   {/* Dots for slide navigation */}
   <div className={styles.dotsContainer}>
     {Array.from({ length: 3 }, (_, index) => (
@@ -228,42 +249,70 @@ const [ bannersResponse, footerResponse] = await Promise.all([
 </div>
 
 
-      {/* Local Highlights and Login Section */}
-      <section className="flex flex-col sm:flex-row w-full h-full py-4 bg-white">
-        <div className="w-full max-h-full flex justify-center items-center">
-          <div className="px-4 py-4">
+      {/* Divider */}
+      <div className="bg-white h-[2px]"></div>
+
+      {/* Main Content Section */}
+      <div className="flex flex-col sm:flex-row w-full h-full">
+        {/* Local Highlights Section */}
+        <div className="w-full max-h-full bg-white flex justify-center items-center py-4">
+          <div className='px-4 py-4'>
             {/* <LocalHighlights /> */}
-            <Local_Highlights/>
-          </div>
+            <LocalHighlights2/>
+            </div>
         </div>
-        <aside className="w-full sm:w-3/6 py-4">
+
+        {/* Login Page Section */}
+        {/* <div className="w-full min-h-full  bg-white">
+          <LoginPage />
+        </div> */}
+          <aside className="w-full sm:w-3/6 bg-white py-4">
           <LoginPage />
         </aside>
-      </section>
+      </div>
 
+      {/* Divider */}
+      <div className="bg-white h-[2px]"></div>
 
       {/* Promotional Banners Section */}
-      <section className="flex justify-center bg-white py-4">
-        <button onClick={prevBanners} className="p-2 transition-transform duration-300 transform hover:scale-110">
-          <FontAwesomeIcon icon={faChevronLeft} />
-        </button>
-        <div className="flex flex-row px-4 py-2 items-center w-full">
+      <div className="flex justify-center bg-white">
+        <div className='flex items-center'>
+          <button onClick={prevBanners} className="p-2 transition-transform duration-300 transform hover:scale-110">
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </button>
+        </div>
+        <div className='flex flex-row px-4 py-2 scroll-smooth items-center w-full'>
           {banners.length > 0 ? (
             banners.slice(currentIndex, currentIndex + bannersToShow).map((banner) => (
-              <div key={banner._id} className="w-full sm:w-1/3 p-2 relative group">
-                <a href={banner.link} target="_blank" rel="noopener noreferrer" className="block">
+              <div key={banner._id} className="w-full sm:w-1/3 p-2 relative group"> {/* Added relative for absolute positioning */}
+                <a
+                  href={banner.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block" // Make the entire div clickable
+                >
+                  {/* <img
+                    src={banner.imageUrl}
+                    alt={banner.description} // Better accessibility
+                    className="w-full h-auto rounded"
+                    style={{ maxHeight: '200px', objectFit: 'cover' }} // Maintain aspect ratio and prevent overflow
+                  /> */}
                   <Image
                     src={banner.imageUrl}
                     alt={banner.description}
                     layout="responsive"
-                    width={500}
-                    height={300}
+                    width={500} // These values define the aspect ratio
+                    height={300} // Adjust the width and height ratio to fit your needs
                     className="w-full h-auto rounded"
-                    style={{ objectFit: "cover" }}
+                    style={{ objectFit: 'cover' }}
                     priority
                   />
-                  <div className="absolute bottom-4 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <h3 className="font-semibold px-6 py-2 bg-white rounded-md">{banner.description}</h3>
+                  <div className="absolute bottom-4 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity"> {/* Hover effect */}
+                    <h3 className="font-semibold px-6 py-2">
+                      <div className='description px-2 py-2 rounded-md text-black bg-white'>
+                        {banner.description}
+                      </div>
+                    </h3>
                   </div>
                 </a>
               </div>
@@ -272,17 +321,25 @@ const [ bannersResponse, footerResponse] = await Promise.all([
             <p>No promotional banners available.</p>
           )}
         </div>
-        <button onClick={nextBanners} className="p-2 transition-transform duration-300 transform hover:scale-110">
-          <FontAwesomeIcon icon={faChevronRight} />
-        </button>
-      </section>
+        <div className='flex items-center'>
+          <button onClick={nextBanners} className="p-2 transition-transform duration-300 transform hover:scale-110">
+            <FontAwesomeIcon icon={faChevronRight} />
+          </button>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="bg-white h-[2px]"></div>
 
       {/* Regional Highlights Section */}
-      <section className="flex flex-col sm:flex-row w-full h-auto bg-white py-4">
-        <div className="w-full sm:w-3/5 px-4">
-          <RegionalHighlights />
-        </div>
-      </section>
+      <div className="flex flex-col sm:flex-row w-full h-auto">
+        <div className="w-full sm:w-3/5 px-4 py-2 bg-white"><RegionalHighlights /></div>
+        <div className="bg-white"></div>
+        <div className="w-full sm:w-2/5 bg-white"></div>
+      </div>
+
+      {/* Divider */}
+      <div className="bg-white"></div>
 
       {/* Footer */}
       <div className="flex flex-row flex-grow justify-evenly items-center px-16 py-4 bg-white text-black">
@@ -319,6 +376,11 @@ const [ bannersResponse, footerResponse] = await Promise.all([
             </ul>)}
         </div>
       </div>
+      {/* <div className='flex flex-row justify-evenly bg-white text-black'>
+        <div className='font-bold'>© 2024 Company Name. All Rights Reserved</div>
+        <div>Privacy Policy</div>
+        <div>Terms And Conditions</div>
+      </div> */}
     </div>
   );
 }

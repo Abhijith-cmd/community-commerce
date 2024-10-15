@@ -8,27 +8,27 @@ import dynamic from "next/dynamic";
 //import Image from "next/image";
 //import Local_Highlights from "@/components/local_highlights";
 import { usePathname } from 'next/navigation';
-
-
-const District_Events = dynamic(() => import('@/components/district_events/district_events'), { ssr: false });
-
-
-
+ 
+ 
+const District_Events = dynamic(() => import('../../components/district_events/district_events'), { ssr: false });
+ 
+ 
+ 
 interface FooterData {
   section_1: string[];
   section_2: string[];
   section_3: string[];
   section_4: string[];
 }
-
+ 
 // Define the type for menu items
 interface MenuItem {
     label: string;
     link: string;
 }
-
+ 
 export default function Events() {
-
+ 
     const [footerData, setFooterData] = useState<FooterData | null>(null);
     //const [currentIndex, setCurrentIndex] = useState(0);
     const router = useRouter();
@@ -42,30 +42,30 @@ export default function Events() {
         { label: 'Shop', link: '/shop' }
       ];
       const currentRoute = usePathname();
-
-
+ 
+ 
       // Fetch data in parallel using Promise.all to reduce load time
   useEffect(() => {
     const fetchData = async () => {
       try {
 //const [menuResponse, bannersResponse, footerResponse] = await Promise.all([
 const [footerResponse] = await Promise.all([
-
+ 
           //fetch("/api/MenuListRoutes"),
           //fetch("/api/promotionalBannerRoutes"),
           fetch("/api/footerRoutes")
         ]);
-
+ 
         const footerData = await footerResponse.json();
         setFooterData(footerData);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
         };
-      
+     
         fetchData();
       }, []);
-      
+     
       const handleNavigation = useCallback((path: string) => {
         router.push(path);
       }, [router]);
@@ -77,14 +77,14 @@ const [footerResponse] = await Promise.all([
             <div className="w-full sm:w-2/5 md:w-1/5 bg-white flex justify-center items-center p-2">
               <div className="flex justify-center items-center cursor-pointer" onClick={() => handleNavigation('/')}>Logo</div>
             </div>
-    
+   
             {/* Navigation Links */}
             <div className="w-full sm:w-3/5 md:w-4/5 bg-white flex flex-wrap">
               <div className="flex justify-between px-3 py-2 w-full">
                 <div className="flex items-center">
                   {/* Header navigation */}
                 </div>
-    
+   
                 <div className="flex flex-wrap justify-end gap-4 font-bold items-center">
                   {/* <a href="" className="block">Contact Us</a> */}
                   <div className="block hover:underline cursor-pointer" onClick={() => handleNavigation('/contactUs')}>Contact Us</div>
@@ -107,7 +107,7 @@ const [footerResponse] = await Promise.all([
               </div>
             </div>
           </div>
-    
+   
           <section className="flex flex-wrap justify-center w-full px-4 py-3 font-bold bg-black text-white">
   <div className="flex flex-wrap gap-6 sm:gap-12">
     {menuItems.map((menuItem, index) => (
@@ -126,11 +126,11 @@ const [footerResponse] = await Promise.all([
     ))}
   </div>
 </section>
-
-
-    
-          
-
+ 
+ 
+   
+         
+ 
             {/* Regional Highlights Section */}
             <div className="w-full max-h-full flex">
               <div className="px-4 py-4">
