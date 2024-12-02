@@ -13,6 +13,11 @@ import Image from 'next/image';
 import LocalHighlights2 from '@/components/localHighlightsForHome/Page';
 
 
+interface cartItemNumber{
+  itemCount:number
+}
+
+
 export default function Home() {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [userId, setUserId] = useState<string | null>(null); // State to store userId
@@ -26,6 +31,11 @@ export default function Home() {
   const { isAuthenticated } = useAuth();
   const { setToken } = useAuth();
   const [countryName,setCountryName] = useState<string>('');
+
+  //for cart Item Count
+  const [cartItemNumber,setCartItemNumber] = useState<cartItemNumber>({ itemCount: 0 })
+
+
 
 
   interface Banner {
@@ -253,6 +263,10 @@ console.log("the user country name in useEffect",countryName);
     // return () => clearInterval(intervalId);
   }, []);
 
+  useEffect(()=>{
+
+  },[])
+
   const nextBanners = () => {
     setCurrentIndex((prevIndex) => (prevIndex + bannersToShow) % banners.length);
   };
@@ -270,6 +284,85 @@ console.log("the user country name in useEffect",countryName);
 
     fetchFooterData();
   }, []);
+
+  // useEffect(() => {
+  //   if (!userId) return; 
+
+  //   let intervalId: NodeJS.Timeout | null = null;
+
+  //   const fetchCartItemCount = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         `/api/CartItemCounterRoutes/?userId=${userId}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
+
+  //       const fetchedItemCount = response.data.itemCount;
+  //       setCartItemNumber({ itemCount: fetchedItemCount });
+  //     } catch (error) {
+  //       console.error('Error fetching cart item count:', error);
+  //       // Optionally handle error state here
+  //     }
+  //   };
+
+  //   // Start polling every 5 seconds
+  //   intervalId = setInterval(() => {
+  //     fetchCartItemCount();
+  //   }, 100);
+
+  //   // Cleanup interval on unmount
+  //   return () => {
+  //     if (intervalId) clearInterval(intervalId);
+  //   };
+  // }, [userId, token]);
+
+
+//   useEffect(() => {
+//     // Fetch cart item count when userId or token changes
+//     const fetchCartItemCount = async () => {
+//       if (!userId) return;
+//       try {
+//         const response = await axios.get(`/api/CartItemCounterRoutes/?userId=${userId}`, {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//           },
+//         });
+//         setCartItemNumber(response.data.itemCount);
+//       } catch (error) {
+//         console.error('Error fetching cart item count:', error);
+//       }
+//     };
+
+//     fetchCartItemCount();
+//   }, [userId, token, cartItemNumber]); // Depend on userId, token, and cartItemNumber
+
+//   return { cartItemNumber };
+// };
+
+useEffect(() => {
+  const fetchCartItemCount = async () => {
+    if (!userId || !token) return; // Ensure both userId and token are available
+
+    try {
+      const response = await axios.get(`/api/CartItemCounterRoutes/?userId=${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCartItemNumber({ itemCount: response.data.itemCount }); // Update state with the fetched count
+    } catch (error) {
+      console.error('Error fetching cart item count:', error);
+    }
+  };
+
+  fetchCartItemCount(); // Call immediately when userId or token changes
+}, [userId, token]); // Only trigger when userId or token change
+
+
 
   return (
     <div>
@@ -325,7 +418,12 @@ console.log("the user country name in useEffect",countryName);
                       </div>
                     )}
                   </div>
-                  <a href="" className="block">Cart <FontAwesomeIcon icon={faShoppingCart} size="lg" /></a>
+                  <div onClick={()=>handleNavigation('/ordersPageForAuthenticated')} className="block cursor-pointer">My Orders</div>
+                  <div onClick={()=>handleNavigation('/cartPageForAuthenticated')} className="block cursor-pointer relative">Cart <FontAwesomeIcon icon={faShoppingCart} size="2xl" />   {cartItemNumber.itemCount > 0 && (
+            <span className="absolute top-1/3 left-1/2 transform translate-x-1/2 -translate-y-1/2  text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {cartItemNumber.itemCount}
+            </span>
+        )}</div>
                 </div>
               </div>
             </div>
@@ -335,7 +433,7 @@ console.log("the user country name in useEffect",countryName);
           <div className="bg-white h-[2px]"></div>
 
           {/* Main Menu Section */}
-          <div className="flex flex-wrap justify-center w-full px-4 py-3 font-bold bg-white">
+          {/* <div className="flex flex-wrap justify-center w-full px-4 py-3 font-bold bg-white">
             <div className="flex flex-wrap gap-6 sm:gap-12">
               {menuItems.map((menuItem, index) => (
                 <div key={index}>
@@ -343,7 +441,20 @@ console.log("the user country name in useEffect",countryName);
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
+          <div className="flex flex-wrap justify-center w-full px-4 py-3 font-bold bg-white">
+  <div className="flex flex-wrap gap-6 sm:gap-12">
+    {menuItems.map((menuItem, index) => (
+      <div key={index}>
+        {menuItem === "Shop" ? (
+          <div className='cursor-pointer' onClick={() => handleNavigation('/shopPageForAuthenticated')}>{menuItem}</div>
+        )  : (
+          <div className='cursor-pointer'>{menuItem}</div>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
 
           {/* Divider */}
           <div className="bg-white h-[2px]"></div>

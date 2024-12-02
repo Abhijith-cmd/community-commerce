@@ -1,6 +1,7 @@
 // controllers/ShopMenuItemCategoriesController.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import ShopMenuItemCategories, { IShopMenuItem } from '../../models/ShopMenuItemCategoriesModel/ShopMenuItemCategoriesModel'; 
+import dbConnection from '@/lib/DbConnection/DbConnection';
 
 // // Function to get all categories
 // export const getShopMenuItemCategories = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -61,9 +62,21 @@ import ShopMenuItemCategories, { IShopMenuItem } from '../../models/ShopMenuItem
 
 //new function
 // Function to get all categories
+// export const getShopMenuItemCategories = async (req: NextApiRequest, res: NextApiResponse) => {
+//     try {
+//         const categories = await ShopMenuItemCategories.find();
+//         res.status(200).json(categories);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error fetching categories', error });
+//     }
+// };
+
+// Function to get all categories based on isActive:true
 export const getShopMenuItemCategories = async (req: NextApiRequest, res: NextApiResponse) => {
+    await dbConnection()
     try {
-        const categories = await ShopMenuItemCategories.find();
+        // Filter to only retrieve categories with isActive set to true
+        const categories = await ShopMenuItemCategories.find({ isActive: true });
         res.status(200).json(categories);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching categories', error });

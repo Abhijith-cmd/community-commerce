@@ -150,7 +150,7 @@ export default function Home() {
                */}
               <div className="relative bg-white">
               </div>
-              <a href="" className="block">Cart <FontAwesomeIcon icon={faShoppingCart} size="lg" /></a>
+              <div onClick={()=>handleNavigation('/cart')} className="block cursor-pointer">Cart <FontAwesomeIcon icon={faShoppingCart} size="lg" /></div>
             </div>
           </div>
         </div>

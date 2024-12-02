@@ -280,8 +280,6 @@ const localityOptions: OptionType[] = [
     const [countries, setCountries] = useState<string[]>([]);
     const [states, setStates] = useState<string[]>([]);
  
-    const [firstNameError, setFirstNameError] = useState('');
-    const [lastNameError, setLastNameError] = useState('');
    // Fetch countries on component mount
    useEffect(() => {
     const fetchCountries = async () => {
@@ -374,40 +372,7 @@ const localityOptions: OptionType[] = [
         setLocality(selectedOptions as OptionType[]);
      
       }
-      // Function to handle first name input with validation for alphabets
-      const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        if (/^[A-Za-z]*$/.test(value)) {  // Regex to allow only alphabet characters
-          setFirstName(value);
-          setFirstNameError('');  // Clear error if valid input
-        } else {
-          setFirstNameError('Only alphabetic characters are allowed.');
-        }
-      };
-    
-      // Function to handle last name input with validation for alphabets
-      const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        if (/^[A-Za-z]*$/.test(value)) {  // Regex to allow only alphabet characters
-          setLastName(value);
-          setLastNameError('');  // Clear error if valid input
-        } else {
-          setLastNameError('Only alphabetic characters are allowed.');
-        }
-        
-      };
-      const [phoneNumberError, setPhoneNumberError] = useState<string>('');
-
-  // Function to handle phone number input and allow only numeric values
-  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (/^\d*$/.test(value)) {  // Regex to allow only digits
-      setPhoneNumber(value);
-      setPhoneNumberError('');  // Clear error if valid input
-    } else {
-      setPhoneNumberError('Only numeric characters are allowed.');
-    }};
-      
+ 
     return (
         // <div className="min-w-screen min-h-screen flex flex-row justify-center items-center p-4 bg-white">
         //     <form action="" className="w-full max-w-md flex flex-row justify-center items-center shrink-0">
@@ -548,14 +513,12 @@ const localityOptions: OptionType[] = [
           type="text"
           id="first_name"
           value={firstName}
-          onChange={handleFirstNameChange}
-          className="rounded-lg outline-none px-4 py-2 border-2 border-gray-300 focus:border-blue-500 transition duration-300"
-          style={{ border: "1px solid black" }}
+          onChange={(e) => setFirstName(e.target.value)}
+          className="rounded-lg outline-none px-4 py-2 border-2 border-gray-300 focus:border-blue-500 transition duration-300" style={{ border: "1px solid black" }}
           required
         />
-        {firstNameError && <span className="text-red-500">{firstNameError}</span>} {/* Error message */}
       </div>
-
+ 
       {/* Last Name */}
       <div className="flex flex-col w-full mb-4">
         <label htmlFor="last_name" className="font-bold text-gray-700">Last Name</label>
@@ -563,12 +526,10 @@ const localityOptions: OptionType[] = [
           type="text"
           id="last_name"
           value={lastName}
-          onChange={handleLastNameChange}
-          className="rounded-lg outline-none px-4 py-2 border-2 border-gray-300 focus:border-blue-500 transition duration-300"
-          style={{ border: "1px solid black" }}
+          onChange={(e) => setLastName(e.target.value)}
+          className="rounded-lg outline-none px-4 py-2 border-2 border-gray-300 focus:border-blue-500 transition duration-300" style={{ border: "1px solid black" }}
           required
         />
-        {lastNameError && <span className="text-red-500">{lastNameError}</span>} {/* Error message */}
       </div>
  
       {/* Email ID */}
@@ -729,22 +690,11 @@ const localityOptions: OptionType[] = [
                         <input type="text" id="preferred_language" value={preferredLanguage} onChange={(e) => setPreferredLanguage(e.target.value)} className="rounded-lg outline-none px-2 py-1 border-none w-full" style={{ border: "2px solid black" }} required />
                     </div>
  
-       {/* Phone Number */}
-       <div className="flex flex-col m-auto py-4 min-w-1/2">
-        <label htmlFor="phone_number" className="font-bold w-full">Phone Number</label>
-        <input
-          type="tel"
-          id="phone_number"
-          value={phoneNumber}
-          onChange={handlePhoneNumberChange}
-          className="rounded-lg outline-none px-2 py-1 border-none w-full"
-          style={{ border: "2px solid black" }}
-          required
-        />
-        {phoneNumberError && <span className="text-red-500">{phoneNumberError}</span>} {/* Error message */}
-      </div>              
-
-      
+                    {/* Phone Number */}
+                    <div className="flex flex-col m-auto py-4 min-w-1/2">
+                        <label htmlFor="phone_number" className="font-bold w-full">Phone Number</label>
+                        <input type="tel" id="phone_number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="rounded-lg outline-none px-2 py-1 border-none w-full" style={{ border: "2px solid black" }} required />
+                    </div>
  
       {/* Submit Button */}
       <button

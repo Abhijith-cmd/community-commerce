@@ -1,37 +1,11 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import './styles.css'
-
-
-// Define the interface for menu items
-// interface MenuItem {
-//     name: string; // or other properties if needed
-// }
-
-// interface MenuItem {
-//     _id: string;
-//     name: string;
-//     sections: {
-//         [key: string]: string[]; // This indicates sections will have string keys and array of strings as values
-//     };
-// }
-
-// interface MenuItem {
-//     _id: string;
-//     name: string;
-//     createdAt: string;
-//     __v: number;
-//     sections?: {
-//         [key: string]: { // This can be a dynamic key
-//             [key: string]: string[]; // Each section key maps to an array of strings
-//         };
-//     };
-// }
-
+import Image from 'next/image';
 
 interface MenuItem {
     _id: string;
@@ -41,48 +15,56 @@ interface MenuItem {
     };
 }
 
+interface Product {
+    _id: string;
+    name: string;
+    primaryCategory: string;
+    subCategory: string;
+    shortDescription: string;
+    longDescription: string;
+    price: number;
+    currency: string;
+    images: { url: string; altText: string; color: string }[];
+    colors: { colorName: string; price: number; inventory: number }[];
+    material: string;
+    brand: string;
+    available: boolean;
+    isOnSale: boolean;
+    salePrice?: number;
+    tags: string[];
+    rating: number;
+    inventory: number;
+}
 
-
+interface Category {
+    _id: string;
+    category: Product[];
+}
 
 export default function Shop() {
     const [menuItems, setMenuItems] = useState<string[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
+    //for error messages
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     //shop Menu Items
     const [shopMenuItems, setShopMenuItems] = useState<MenuItem[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null); // Ref for the dropdown
+
+    //for filtering with price
+    const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
+    const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
+
     const router = useRouter();
 
     // Function to handle dropdown toggle
     const toggleDropdown = (id: string) => {
         setOpenDropdown(openDropdown === id ? null : id); // Toggle the dropdown
     };
-
-
-    // interface Banner {
-    //     _id: string;
-    //     imageUrl: string;
-    //     description: string;
-    //     link: string;
-    // }
-
-    // interface FooterData {
-    //     section_1: string[];
-    //     section_2: string[];
-    //     section_3: string[];
-    //     section_4: string[];
-    // }
-
-    // const [banners, setBanners] = useState<Banner[]>([]);
-    // const [footerData, setFooterData] = useState<FooterData | null>(null);
-    // const [currentIndex, setCurrentIndex] = useState(0);
-    // const bannersToShow = 4; // Number of banners to show at a time
-    // const [showProfileOptions, setShowProfileOptions] = useState(false);
-
-    // const toggleProfileOptions = () => {
-    //   setShowProfileOptions(!showProfileOptions);
-    // };
 
     // Fetch menu items from the API
     useEffect(() => {
@@ -92,7 +74,7 @@ export default function Shop() {
                 const data = await response.json();
                 const menuNames = data.map((item: { name: string }) => item.name); // Extract names from the data
                 console.log(menuItems);
-                
+
                 setMenuItems(menuNames);
             } catch (error) {
                 console.error('Error fetching menu items:', error);
@@ -124,44 +106,112 @@ export default function Shop() {
         fetcShopMenuItems();
     }, []);
 
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await fetch("/api/CategoryRoutes");
+                const data = await response.json();
+
+                if (data.success && data.categories.length > 0) {
+                    const allProducts: Product[] = data.categories.flatMap((category: Category) => category.category);
+                    setProducts(allProducts);
+                    setFilteredProducts(allProducts);
+                } else {
+                    console.log("Failed to load products.");
+                }
+            } catch (error) {
+                console.log("Error fetching data.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
+    // Function to handle price filter
+    const applyPriceFilter = () => {
+
+        if (minPrice !== undefined && maxPrice !== undefined) {
+            if (minPrice === maxPrice) {
+                setErrorMessage("Minimum price cannot be equal to maximum price.");
+                return;
+            }
+            if (minPrice > maxPrice) {
+                setErrorMessage("Minimum price cannot be greater than maximum price.");
+                return;
+            }
+        }
+
+
+        setErrorMessage(null); // Reset error message if no error is found
+
+        const filtered = products.filter((product) => {
+            // const productPrice = product.isOnSale ? product.salePrice || product.price : product.price;
+            const productPrice = product.price;
+            const meetsMinPrice = minPrice === undefined || productPrice >= minPrice;
+            const meetsMaxPrice = maxPrice === undefined || productPrice <= maxPrice;
+            return meetsMinPrice && meetsMaxPrice;
+        });
+
+        setFilteredProducts(filtered);
+    };
+
+    // Reset price filter
+    const resetFilter = () => {
+        if (errorMessage) {
+            setErrorMessage(null);
+        }
+        setMinPrice(undefined);
+        setMaxPrice(undefined);
+        setFilteredProducts(products);
+    };
+
+    // Handle the keydown and keyup events to block 'e' and negative values
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        const isArrowKey = e.key === 'ArrowUp' || e.key === 'ArrowDown';
+        if (e.key === 'e' || e.key === 'E' || e.key === '-' || e.key === '.') {
+            e.preventDefault();
+        }
+
+        if (isArrowKey) {
+            e.preventDefault();
+        }
+    };
+
+    // Prevent scrolling (both mouse and keyboard)
+    const handleWheel = (e: React.WheelEvent) => {
+        e.preventDefault();
+    };
+
+    // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, setPrice: React.Dispatch<React.SetStateAction<number | undefined>>) => {
+    //     const value = e.target.value;
+    //     if (value === '' || /^[0-9]*$/.test(value)) {
+    //         setPrice(value === '' ? undefined : parseFloat(value));
+    //     }
+    // };
+
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setOpenDropdown(null); // Close dropdown when clicking outside
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    const handleProductNavigation = (productId: string) => {
+        router.push(`/pdpPage/${productId}`);
+    };
+
+
     // Render the component
     if (loading) return <p>Loading...</p>;
-
-    // Fetch promotional banners from the API
-    // useEffect(() => {
-    //     const fetchBanners = async () => {
-    //         try {
-    //             const response = await fetch('/api/promotionalBannerRoutes'); // Ensure your API route matches
-    //             const data = await response.json();
-    //             setBanners(data);
-    //         } catch (error) {
-    //             console.error('Error fetching banners:', error);
-    //         }
-    //     };
-
-    //     fetchBanners();
-
-    // }, []);
-
-    // const nextBanners = () => {
-    //     setCurrentIndex((prevIndex) => (prevIndex + bannersToShow) % banners.length);
-    // };
-
-    // const prevBanners = () => {
-    //     setCurrentIndex((prevIndex) => (prevIndex - bannersToShow + banners.length) % banners.length);
-    // };
-
-    // useEffect(() => {
-    //     const fetchFooterData = async () => {
-    //         const response = await fetch('/api/footerRoutes'); // Adjust the API route as needed
-    //         const data = await response.json();
-    //         setFooterData(data);
-    //     };
-
-    //     fetchFooterData();
-    // }, []);
-
-
 
     return (
         <div className="flex flex-col flex-shrink overflow-x-hidden min-h-screen  text-black">
@@ -210,7 +260,7 @@ export default function Shop() {
                */}
                             <div className="relative bg-white">
                             </div>
-                            <a href="" className="block">Cart <FontAwesomeIcon icon={faShoppingCart} size="lg" /></a>
+                            <div onClick={() => handleNavigation('/cart')} className="block cursor-pointer">Cart <FontAwesomeIcon icon={faShoppingCart} size="lg" /></div>
                         </div>
                     </div>
                 </div>
@@ -230,7 +280,7 @@ export default function Shop() {
                             <div className='flex flex-col w-full' onMouseOver={() => toggleDropdown(item._id)}>{item.name}</div>
                             {/* Dropdown Section */}
                             {openDropdown === item._id && item.sections && (
-                                <div className="absolute left-0 top-11 bg-black text-black w-full flex flex-col px-8 py-4 dropdown" style={{ border: "2px solid white" }}>
+                                <div className="absolute left-0 top-11 bg-black text-black w-full flex flex-col px-8 py-4 dropdown" style={{ border: "2px solid white" }} ref={dropdownRef}>
                                     {/* Accessing sections */}
                                     {Object.entries(item.sections).map(([sectionName, subSections]) => (
                                         <div key={sectionName} className="flex flex-col w-full">
@@ -263,17 +313,110 @@ export default function Shop() {
 
                 </div>
             </div>
-
-
-
             {/* Divider */}
             <div className="bg-white h-[2px]"></div>
-
             {/* Main Content Section */}
-            <div className="flex flex-col sm:flex-row w-full h-full">
+            <div className="flex flex-col sm:flex-row w-full h-full bg-black">
                 {/* Local Highlights Section */}
-                <div className="w-full max-h-full bg-white flex justify-center items-center py-4">
-                    <div className='px-4 py-4'>
+                <aside className="w-full sm:w-3/6 bg-white text-black py-4 px-4">
+                    <div>
+                        <h3 className="font-bold text-lg mb-4">Filter by Price</h3>
+                        <div className="mb-4">
+                            <label htmlFor="minPrice" className="block mb-1">Min Price:</label>
+                            <input
+                                type="number"
+                                id="minPrice"
+                                value={minPrice || ''}
+                                onChange={(e) => setMinPrice(parseFloat(e.target.value))}
+                                onKeyDown={handleKeyDown}
+                                onWheel={handleWheel}
+                                className="w-full p-2 border rounded numberpriceinputfield"
+                                placeholder="Enter minimum price"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label htmlFor="maxPrice" className="block mb-1">Max Price:</label>
+                            <input
+                                type="number"
+                                id="maxPrice"
+                                value={maxPrice || ''}
+                                onChange={(e) => setMaxPrice(parseFloat(e.target.value))}
+                                onKeyDown={handleKeyDown}
+                                onWheel={handleWheel}
+                                className="w-full p-2 border rounded numberpriceinputfield"
+                                placeholder="Enter maximum price"
+                            />
+                        </div>
+                        <div className='w-full text-red-500 py-2 px-2'>
+                            {errorMessage}
+                        </div>
+                        <div className='flex flex-col w-full gap-2'>
+                            <button
+                                onClick={applyPriceFilter}
+                                className="w-full bg-purple-600 text-white py-2 rounded"
+                            >
+                                Apply Filter
+                            </button>
+                            <button
+                                onClick={resetFilter}
+                                className="w-full bg-black text-white py-2 px-4 rounded-md"
+                            >
+                                Reset Filter
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+                <div className="w-full max-h-full bg-white text-black flex justify-center items-center px-2 py-4">
+                    <div className="px-4 py-4 bg-black text-white w-full max-w-screen-xl">
+                        <div className="flex flex-wrap justify-center">
+                            {filteredProducts.length > 0 ?
+                                (filteredProducts.map((product) => (
+                                    <div key={product._id} className="product-card w-full md:w-1/2 lg:w-1/3 p-4" onClick={() => handleProductNavigation(product._id)}>
+                                        <div className="bg-white p-4 rounded-lg shadow-md text-black h-full flex flex-col">
+                                            {/* Image Container */}
+                                            <div className="relative w-full h-64 mb-4 lg:h-96">
+                                                {/* <Image
+                                                    src={product.images[0]?.url}
+                                                    alt={product.images[0].altText}
+                                                    layout="fill" // Responsive fill
+                                                    objectFit="contain" // Maintain aspect ratio
+                                                    className="rounded-lg" // Rounded corners for the image
+                                                /> */}
+                                                {product.images[0]?.url ? (
+                                                    <Image
+                                                        src={product.images[0].url}
+                                                        alt={product.images[0].altText || "Product image"}
+                                                        layout="fill" // Responsive fill
+                                                        objectFit="contain" // Maintain aspect ratio
+                                                        className="rounded-lg" // Rounded corners for the image
+                                                    />
+                                                ) : (
+                                                    <p className="flex items-center justify-center w-full h-full text-gray-500">
+                                                        Image not available
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {/* Product Info */}
+                                            <h2 className="text-lg font-bold mb-2">{product.name}</h2>
+                                            <p className="text-sm mb-2">{product.shortDescription}</p>
+                                            <p className="text-sm mb-2">
+                                                Price: {product.currency} {product.price.toFixed(2)}
+                                                {product.isOnSale && (
+                                                    <span> (On Sale: {product.salePrice?.toFixed(2)})</span>
+                                                )}
+                                            </p>
+                                            <p className="text-sm mb-2">Rating: {product.rating} stars</p>
+                                            {/* <p className="text-sm mb-2">Brand: {product.brand}</p>
+            <p className="text-sm mb-2">Available: {product.available ? "Yes" : "No"}</p> */}
+                                        </div>
+                                    </div>
+                                ))
+                                ) : (
+                                    <div>No Products available for this filter</div>
+                                )
+                            }
+                        </div>
                     </div>
                 </div>
 
@@ -281,9 +424,7 @@ export default function Shop() {
                 {/* <div className="w-full min-h-full  bg-white">
           <LoginPage />
         </div> */}
-                <aside className="w-full sm:w-3/6 bg-white py-4">
 
-                </aside>
             </div>
 
             {/* Divider */}

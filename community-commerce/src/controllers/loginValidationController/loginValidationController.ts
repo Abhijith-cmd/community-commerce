@@ -79,7 +79,7 @@ export const validateLogin = async (req: NextApiRequest, res: NextApiResponse) =
             const user = await UserCredentials.findOne({ username });
 
             if (!user) {
-                return res.status(404).json({ error: 'User not found' });
+                return res.status(404).json({ error: 'Invalid Username' });
             }
 
             // Compare the password entered by the user with the hashed password stored in the database

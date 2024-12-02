@@ -1,0 +1,17 @@
+/* .checkoutPage::-webkit-scrollbar{
+display:none;
+} */
+
+/* Hide scrollbar across the entire page */
+html, body {
+    overflow: scroll; /* Allows scrolling */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none; /* Hides scrollbar on Chrome, Safari, and Edge */
+}
+
+html, body {
+    scrollbar-width: none; /* Hides scrollbar on Firefox */
+}
